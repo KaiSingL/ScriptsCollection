@@ -1,4 +1,4 @@
-# Script to display computer name and drive space information for fixed, network, and external drives in a formatted table
+# Script to display computer name and drive space information in a tab-delimited format for easy copying into a Word table
 Write-Debug "Starting script to gather drive space information"
 
 # Initialize array to store drive information
@@ -41,7 +41,7 @@ try {
             [math]::Round((($totalSpaceGB - $freeSpaceGB) / $totalSpaceGB) * 100, 1) 
         }
 
-        # Determine drive type for clarity
+        # Determine drive type for clarity (not displayed but used for debugging)
         $driveType = switch ($drive.DriveType) {
             2 { "Removable" }
             3 { "Fixed" }
@@ -80,15 +80,18 @@ Write-Debug "Outputting computer name: $computerName"
 Write-Host "Computer Name: $computerName"
 Write-Host "" # Empty line for readability
 
-# Format and display the table
-Write-Debug "Formatting output table"
-$formatString = "{0,-16} {1,-20} {2,-20} {3,-10}"
-Write-Host ($formatString -f "Drive Letter", "Total Space (GB)", "Free Space (GB)", "Used %")
-Write-Host ($formatString -f "------------", "----------------", "---------------", "------")
+# Output table in tab-delimited format
+Write-Debug "Outputting table in tab-delimited format"
+# Header
+Write-Host "Drive Letter`tTotal Space (GB)`tFree Space (GB)`tUsed %"
 
+# Data rows
 foreach ($info in $driveInfo) {
     Write-Debug "Displaying info for drive: $($info.DriveLetter) ($($info.DriveType))"
-    Write-Host ($formatString -f $info.DriveLetter, $info.TotalSpaceGB, $info.FreeSpaceGB, $info.UsedPercent)
+    # Format FreeSpaceGB and UsedPercent to 0.0
+    $formattedFreeSpace = "{0:F1}" -f $info.FreeSpaceGB
+    $formattedUsedPercent = "{0:F1}" -f $info.UsedPercent
+    Write-Host "$($info.DriveLetter)`t$($info.TotalSpaceGB)`t$formattedFreeSpace`t$formattedUsedPercent"
 }
 
 Write-Debug "Script execution completed"
